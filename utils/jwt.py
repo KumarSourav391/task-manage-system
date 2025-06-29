@@ -26,3 +26,20 @@ def token_required(f):
             return jsonify({"message": "Token is invalid"}), 401
         return f(current_user, *args, **kwargs)
     return decorated
+
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        if 'Authorization' in request.headers:
+            token = request.headers['Authorization'].split(" ")[1]
+        if not token:
+            return jsonify({"message": "Token is missing"}), 401
+        try:
+            current_user = decode_token(token)
+            if current_user['role'] != 'admin':
+                return jsonify({"message": "Admin access required"}), 403
+        except:
+            return jsonify({"message": "Token is invalid"}), 401
+        return f(current_user, *args, **kwargs)
+    return decorated

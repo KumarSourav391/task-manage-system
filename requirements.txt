@@ -4,3 +4,4 @@ flask_marshmallow
 marshmallow-sqlalchemy
 PyJWT
 pytest
+werkzeug

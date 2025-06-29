@@ -1,60 +1,140 @@
 {
   "info": {
     "name": "Task Manager API",
+    "description": "Complete Task Manager API with JWT Auth and Role-based Access",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
-  "item": [
+  "variable": [
     {
-      "name": "Register",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "http://localhost:5000/api/register",
-          "host": [
-            "localhost:5000"
-          ],
-          "path": [
-            "api",
-            "register"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\"username\": \"admin\", \"password\": \"admin123\", \"role\": \"admin\"}"
-        }
-      }
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api"
     },
     {
-      "name": "Login",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Admin",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\": \"admin\", \"password\": \"admin123\", \"role\": \"admin\"}"
+            }
           }
-        ],
-        "url": {
-          "raw": "http://localhost:5000/api/login",
-          "host": [
-            "localhost:5000"
-          ],
-          "path": [
-            "api",
-            "login"
-          ]
         },
-        "body": {
-          "mode": "raw",
-          "raw": "{\"username\": \"admin\", \"password\": \"admin123\"}"
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\": \"user1\", \"password\": \"user123\"}"
+            }
+          }
+        },
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('token', pm.response.json().token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\": \"admin\", \"password\": \"admin123\"}"
+            }
+          }
         }
-      }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "Get All Tasks",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "{{baseUrl}}/tasks?page=1&per_page=10&completed=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "per_page", "value": "10"},
+                {"key": "completed", "value": "false"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Task",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "url": "{{baseUrl}}/tasks",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Sample Task\", \"description\": \"This is a sample task\"}"
+            }
+          }
+        },
+        {
+          "name": "Get Task by ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/tasks/1"
+          }
+        },
+        {
+          "name": "Update Task (Admin Only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "url": "{{baseUrl}}/tasks/1",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Updated Task\", \"completed\": true}"
+            }
+          }
+        },
+        {
+          "name": "Delete Task (Admin Only)",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/tasks/1"
+          }
+        }
+      ]
     }
   ]
 }
